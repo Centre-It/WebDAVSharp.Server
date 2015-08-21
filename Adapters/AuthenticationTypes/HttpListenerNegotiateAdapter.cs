@@ -1,30 +1,68 @@
 ﻿using System;
 using System.Net;
+using System.Security.Principal;
 using System.Threading;
 
-namespace WebDAVSharp.Server.Adapters.Listener
+namespace WebDAVSharp.Server.Adapters.AuthenticationTypes
 {
     /// <summary>
     /// This 
     /// <see cref="IHttpListener" /> implementation wraps around a
     /// <see cref="HttpListener" /> instance.
     /// </summary>
-    internal sealed class HttpListenerAdapter : WebDavDisposableBase, IHttpListener, IAdapter<System.Net.HttpListener>
+    internal sealed class HttpListenerNegotiateAdapter : WebDavDisposableBase, IHttpListener, IAdapter<HttpListener>
     {
-        private readonly System.Net.HttpListener _listener;
+        #region Private Variables
+
+        private readonly HttpListener _listener;
+
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Gets the internal instance that was adapted for WebDAV#.
+        /// </summary>
+        /// <value>
+        /// The adapted instance.
+        /// </value>
+        public HttpListener AdaptedInstance
+        {
+            get
+            {
+                return _listener;
+            }
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpListenerAdapter" /> class.
+        /// Gets the Uniform Resource Identifier (
+        /// <see cref="Uri" />) prefixes handled by the
+        /// adapted 
+        /// <see cref="HttpListener" /> object.
         /// </summary>
-        internal HttpListenerAdapter()
+        public HttpListenerPrefixCollection Prefixes
         {
-            _listener = new System.Net.HttpListener
+            get
+            {
+                return _listener.Prefixes;
+            }
+        }
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpListenerNegotiateAdapter" /> class.
+        /// </summary>
+        internal HttpListenerNegotiateAdapter()
+        {
+            _listener = new HttpListener
             {
                 AuthenticationSchemes = AuthenticationSchemes.Negotiate,
                 UnsafeConnectionNtlmAuthentication = false
             };
         }
+        #endregion
 
+        #region Function Overrides
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources
         /// </summary>
@@ -34,6 +72,10 @@ namespace WebDAVSharp.Server.Adapters.Listener
             if (_listener.IsListening)
                 _listener.Close();
         }
+
+        #endregion
+
+        #region Public Functions
 
         /// <summary>
         /// Waits for a request to come in to the web server and returns a
@@ -63,35 +105,7 @@ namespace WebDAVSharp.Server.Adapters.Listener
             HttpListenerContext context = _listener.EndGetContext(ar);
             return new HttpListenerContextAdapter(context);
         }
-
-        /// <summary>
-        /// Gets the internal instance that was adapted for WebDAV#.
-        /// </summary>
-        /// <value>
-        /// The adapted instance.
-        /// </value>
-        public System.Net.HttpListener AdaptedInstance
-        {
-            get
-            {
-                return _listener;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Uniform Resource Identifier (
-        /// <see cref="Uri" />) prefixes handled by the
-        /// adapted 
-        /// <see cref="HttpListener" /> object.
-        /// </summary>
-        public HttpListenerPrefixCollection Prefixes
-        {
-            get
-            {
-                return _listener.Prefixes;
-            }
-        }
-
+        
         /// <summary>
         /// Allows the adapted <see cref="HttpListener" /> to receive incoming requests.
         /// </summary>
@@ -107,5 +121,12 @@ namespace WebDAVSharp.Server.Adapters.Listener
         {
             _listener.Stop();
         }
+
+        public IIdentity GetIdentity(IHttpListenerContext context)
+        {
+            return context.AdaptedInstance.User.Identity;
+        }
+
+        #endregion
     }
 }

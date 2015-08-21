@@ -17,6 +17,8 @@ namespace WebDAVSharp.Server.MethodHandlers
     /// </summary>
     internal class WebDavProppatchMethodHandler : WebDavMethodHandlerBase, IWebDavMethodHandler
     {
+
+        #region Properties
         /// <summary>
         /// Gets the collection of the names of the HTTP methods handled by this instance.
         /// </summary>
@@ -34,6 +36,10 @@ namespace WebDAVSharp.Server.MethodHandlers
             }
         }
 
+        #endregion
+
+        #region Functions
+
         /// <summary>
         /// Processes the request.
         /// </summary>
@@ -43,8 +49,6 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
         public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
-            ILog log = LogManager.GetCurrentClassLogger();
-
             /***************************************************************************************************
              * Retreive al the information from the request
              ***************************************************************************************************/
@@ -71,7 +75,7 @@ namespace WebDAVSharp.Server.MethodHandlers
                     {
                         if (requestDocument.DocumentElement.LocalName != "propertyupdate")
                         {
-                            log.Debug("PROPPATCH method without propertyupdate element in xml document");
+                            WebDavServer.Log.Debug("PROPPATCH method without propertyupdate element in xml document");
                         }
 
                         manager = new XmlNamespaceManager(requestDocument.NameTable);
@@ -86,7 +90,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             }
             catch (Exception ex)
             {
-                log.Warn(ex.Message);
+                WebDavServer.Log.Warn(ex.Message);
             }
 
             /***************************************************************************************************
@@ -117,6 +121,7 @@ namespace WebDAVSharp.Server.MethodHandlers
                             fileInfo.LastWriteTime = Convert.ToDateTime(node.InnerText).ToUniversalTime();
                             break;
                         case "Win32FileAttributes":
+                            //todo Win32FileAttributes
                             //fileInfo.Attributes = 
                             //fileInfo.Attributes = Convert.ToDateTime(node.InnerText);
                             break;
@@ -146,7 +151,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             responseNode.AppendChild(hrefProperty.ToXmlElement(responseDoc));
 
             // The propstat element
-            WebDavProperty propstatProperty = new WebDavProperty("propstat", "");
+            WebDavProperty propstatProperty = new WebDavProperty("propstat", string.Empty);
             XmlElement propstatElement = propstatProperty.ToXmlElement(responseDoc);
 
             // The propstat/status element
@@ -162,9 +167,9 @@ namespace WebDAVSharp.Server.MethodHandlers
                             .Contains("lastaccesstime") || child.Name.ToLower()
                                 .Contains("lastmodifiedtime")
                 let node = propNode.SelectSingleNode(child.Name, manager)
-                select node != null
-                    ? new WebDavProperty(child.LocalName, "", node.NamespaceURI)
-                    : new WebDavProperty(child.LocalName, "", ""))
+
+                select new WebDavProperty(child.LocalName, string.Empty, node != null ? node.NamespaceURI : string.Empty))
+
                 propstatElement.AppendChild(property.ToXmlElement(responseDoc));
 
             responseNode.AppendChild(propstatElement);
@@ -190,5 +195,8 @@ namespace WebDAVSharp.Server.MethodHandlers
 
             context.Response.Close();
         }
+
+        #endregion
+
     }
 }

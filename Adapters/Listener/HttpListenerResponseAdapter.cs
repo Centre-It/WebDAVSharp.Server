@@ -12,22 +12,13 @@ namespace WebDAVSharp.Server.Adapters.Listener
     /// </summary>
     internal sealed class HttpListenerResponseAdapter : IWebDavResponse
     {
+        #region Private Variables
+
         private readonly HttpListenerResponse _response;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpListenerResponseAdapter" /> class.
-        /// </summary>
-        /// <param name="Response">The <see cref="HttpListenerResponse" /> to adapt for WebDAV#.</param>
-        /// <exception cref="System.ArgumentNullException">Response</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="Response" /> is <c>null</c>.</exception>
-        public HttpListenerResponseAdapter(HttpListenerResponse Response)
-        {
-        if (Response == null)
-            throw new ArgumentNullException("Response");
+        #endregion
 
-        _response = Response;
-        }
-
+        #region Properties
         /// <summary>
         /// Gets or sets the HTTP status code to be returned to the client.
         /// </summary>
@@ -103,6 +94,24 @@ namespace WebDAVSharp.Server.Adapters.Listener
             }
         }
 
+        #endregion
+
+        #region Public Functions
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpListenerResponseAdapter" /> class.
+        /// </summary>
+        /// <param name="response">The <see cref="HttpListenerResponse" /> to adapt for WebDAV#.</param>
+        /// <exception cref="System.ArgumentNullException">Response</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="response" /> is <c>null</c>.</exception>
+        public HttpListenerResponseAdapter(HttpListenerResponse response)
+        {
+        if (response == null)
+            throw new ArgumentNullException("response");
+
+        _response = response;
+        }
+
         /// <summary>
         /// Sends the response to the client and releases the resources held by the adapted
         /// <see cref="HttpListenerResponse" /> instance.
@@ -121,5 +130,7 @@ namespace WebDAVSharp.Server.Adapters.Listener
         {
             _response.AppendHeader(name, value);
         }
+
+        #endregion
     }
 }

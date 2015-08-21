@@ -13,8 +13,13 @@ namespace WebDAVSharp.Server.Adapters.Listener
     /// </summary>
     internal sealed class HttpListenerRequestAdapter : IWebDavRequest
     {
+        #region Private Variables
+
         private readonly HttpListenerRequest _request;
 
+        #endregion
+
+        #region Public Functions
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpListenerRequestAdapter" /> class.
         /// </summary>
@@ -28,6 +33,10 @@ namespace WebDAVSharp.Server.Adapters.Listener
 
             _request = request;
         }
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets the client IP address and port number from which the request originated.
@@ -105,5 +114,7 @@ namespace WebDAVSharp.Server.Adapters.Listener
                 return _request.ContentLength64;
             }
         }
+
+        #endregion
     }
 }

@@ -15,7 +15,6 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -76,6 +75,8 @@
   <ItemGroup>
     <Compile Include="Adapters\WebContext\WebDavHttpContext.cs" />
     <Compile Include="Adapters\Listener\HttpListenerContextAdapter.cs" />
+    <Compile Include="Adapters\AuthenticationTypes\HttpListenerAnyonymousAdapter.cs" />
+    <Compile Include="Adapters\AuthenticationTypes\HttpListenerBasicAdapter.cs" />
     <Compile Include="Adapters\Listener\HttpListenerRequestAdapter.cs" />
     <Compile Include="Adapters\Listener\HttpListenerResponseAdapter.cs" />
     <Compile Include="Adapters\IAdapter.cs" />
@@ -112,6 +113,10 @@
     <Compile Include="MethodHandlers\WebDavProppatchMethodHandler.cs" />
     <Compile Include="MethodHandlers\WebDavPutMethodHandler.cs" />
     <Compile Include="MethodHandlers\WebDavUnlockMethodHandler.cs" />
+    <Compile Include="Stores\Locks\WebDavLockScope.cs" />
+    <Compile Include="Stores\Locks\WebDavLockType.cs" />
+    <Compile Include="Stores\Locks\WebDaveStoreItemLockInstance.cs" />
+    <Compile Include="Stores\Locks\WebDavStoreItemLock.cs" />
     <Compile Include="Utilities\Md5Util.cs" />
     <Compile Include="Stores\BaseClasses\WebDavStoreDocumentBase.cs" />
     <Compile Include="Stores\BaseClasses\WebDavStoreBase.cs" />
@@ -129,6 +134,7 @@
     <Compile Include="Stores\IWebDavStoreDocument.cs" />
     <Compile Include="Stores\IWebDavStoreItem.cs" />
     <Compile Include="Utilities\WebDavStatusCode.cs" />
+    <Compile Include="WebDavAuthType.cs" />
     <Compile Include="WebDavDisposableBase.cs" />
     <Compile Include="WebDavExtensions.cs" />
     <Compile Include="WebDavHttpHandler.cs" />
@@ -136,6 +142,7 @@
     <Compile Include="WebDavRequestProcessor.cs" />
     <Compile Include="WebDavServer.cs" />
     <Compile Include="Adapters\Listener\HttpListenerAdapter.cs" />
+    <Compile Include="Adapters\AuthenticationTypes\HttpListenerNegotiateAdapter.cs" />
     <Compile Include="MethodHandlers\WebDavMethodHandlers.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -144,7 +151,6 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

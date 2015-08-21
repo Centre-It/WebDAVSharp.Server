@@ -11,8 +11,15 @@ namespace WebDAVSharp.Server.MethodHandlers
     /// This is the base class for <see cref="IWebDavMethodHandler" /> implementations.
     /// </summary>
     internal abstract class WebDavMethodHandlerBase
-        {
+    {
+
+        #region Variables
+
         private const int DepthInfinity = -1;
+
+        #endregion
+
+        #region Static Functions
 
         /// <summary>
         /// Get the parent collection from the requested
@@ -40,9 +47,9 @@ namespace WebDAVSharp.Server.MethodHandlers
             }
             catch (UnauthorizedAccessException)
             {
-                throw  new WebDavUnauthorizedException();
+                throw new WebDavUnauthorizedException();
             }
-            catch(WebDavNotFoundException)
+            catch (WebDavNotFoundException)
             {
                 throw new WebDavConflictException();
             }
@@ -125,6 +132,18 @@ namespace WebDAVSharp.Server.MethodHandlers
             // else, return false
         }
 
+        public static string GetLockTokenIfHeader(IHttpListenerRequest request)
+        {
+            //(<urn:uuid:cfdc70da-7feb-4bfe-8cb7-18f97d8fecb1>)
+            return request.Headers.AllKeys.Contains("If") ? request.Headers["If"].Substring(2, request.Headers["If"].Length-4) : string.Empty;
+        }
+        public static string GetLockTokenHeader(IHttpListenerRequest request)
+        {
+            if (!request.Headers.AllKeys.Contains("Lock-Token")) return string.Empty;
+            string token = request.Headers["Lock-Token"];
+            return (token.Substring(1, token.Length - 2));
+        }
+
         /// <summary>
         /// Gets the Timeout header : Second-number
         /// </summary>
@@ -160,5 +179,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             // else, throw exception
             throw new WebDavConflictException();
         }
+
+        #endregion
     }
 }
