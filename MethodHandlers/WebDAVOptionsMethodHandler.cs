@@ -26,12 +26,11 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Processes the request.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The 
-        /// <see cref="IHttpListenerContext" /> object containing both the request and response
+        /// <see cref="IWebDavContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
-        public void ProcessRequest(WebDavServer server, IHttpListenerContext context, IWebDavStore store)
+        public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
             List<string> verbsAllowed = new List<string> { "OPTIONS", "TRACE", "GET", "HEAD", "POST", "COPY", "PROPFIND", "LOCK", "UNLOCK" };
 
@@ -44,7 +43,7 @@ namespace WebDAVSharp.Server.MethodHandlers
                 context.Response.AppendHeader("Public", verb);
 
             // Sends 200 OK
-            context.SendSimpleResponse();
+            context.SetStatusCode();
         }
     }
 }

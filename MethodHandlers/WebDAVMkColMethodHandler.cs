@@ -33,19 +33,18 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Processes the request.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The 
-        /// <see cref="IHttpListenerContext" /> object containing both the request and response
+        /// <see cref="IWebDavContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavUnsupportedMediaTypeException"></exception>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavMethodNotAllowedException"></exception>
-        public void ProcessRequest(WebDavServer server, IHttpListenerContext context, IWebDavStore store)
+        public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
             if (context.Request.ContentLength64 > 0)
                 throw new WebDavUnsupportedMediaTypeException();
 
-            IWebDavStoreCollection collection = GetParentCollection(server, store, context.Request.Url);
+            IWebDavStoreCollection collection = GetParentCollection(store, context, context.Request.Url);
                 
             string collectionName = Uri.UnescapeDataString(
                 context.Request.Url.Segments.Last().TrimEnd('/', '\\')
@@ -55,7 +54,7 @@ namespace WebDAVSharp.Server.MethodHandlers
 
             collection.CreateCollection(collectionName);
 
-            context.SendSimpleResponse(HttpStatusCode.Created);
+            context.SetStatusCode(HttpStatusCode.Created);
         }
     }
 }

@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using Common.Logging;
 using WebDAVSharp.Server.Adapters;
-using WebDAVSharp.Server.Exceptions;
+using WebDAVSharp.Server.Adapters.Listener;
 using WebDAVSharp.Server.MethodHandlers;
 using WebDAVSharp.Server.Stores;
 
@@ -18,20 +14,15 @@ namespace WebDAVSharp.Server
     /// </summary>
     public class WebDavServer : WebDavDisposableBase
     {
-        /// <summary>
-        /// The HTTP user
-        /// </summary>
-        public const string HttpUser = "HTTP.User";
-
         private readonly IHttpListener _listener;
         private readonly bool _ownsListener;
         private readonly IWebDavStore _store;
-        private readonly Dictionary<string, IWebDavMethodHandler> _methodHandlers;
         private readonly ILog _log;
         private readonly object _threadLock = new object();
 
         private ManualResetEvent _stopEvent;
         private Thread _thread;
+        private readonly WebDavRequestProcessor _webDavRequestProcessor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebDavServer" /> class.
@@ -62,33 +53,20 @@ namespace WebDAVSharp.Server
         {
             if (store == null)
                 throw new ArgumentNullException("store");
+
             if (listener == null)
             {
                 listener = new HttpListenerAdapter();
                 _ownsListener = true;
             }
-            methodHandlers = methodHandlers ?? WebDavMethodHandlers.BuiltIn;
-
-            IWebDavMethodHandler[] webDavMethodHandlers = methodHandlers as IWebDavMethodHandler[] ?? methodHandlers.ToArray();
-
-            if (!webDavMethodHandlers.Any())
-                throw new ArgumentException("The methodHandlers collection is empty", "methodHandlers");
-            if (webDavMethodHandlers.Any(methodHandler => methodHandler == null))
-                throw new ArgumentException("The methodHandlers collection contains a null-reference", "methodHandlers");
 
             _listener = listener;
             _store = store;
-            var handlersWithNames =
-                from methodHandler in webDavMethodHandlers
-                from name in methodHandler.Names
-                select new
-                {
-                    name,
-                    methodHandler
-                };
-            _methodHandlers = handlersWithNames.ToDictionary(v => v.name, v => v.methodHandler);
+
+            _webDavRequestProcessor = new WebDavRequestProcessor(store, methodHandlers);
+
             _log = LogManager.GetCurrentClassLogger();
-            }
+        }
 
         /// <summary>
         /// Gets the 
@@ -227,85 +205,9 @@ namespace WebDAVSharp.Server
             }
         }
 
-        /// <summary>
-        /// Processes the request.
-        /// </summary>
-        /// <param name="state">The state.</param>
-        /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavMethodNotAllowedException">If the method to process is not allowed</exception>
-        /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavUnauthorizedException">If the user is unauthorized or has no access</exception>
-        /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavNotFoundException">If the item was not found</exception>
-        /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavNotImplementedException">If a method is not yet implemented</exception>
-        /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavInternalServerException">If the server had an internal problem</exception>
         private void ProcessRequest(object state)
         {
-
-            IHttpListenerContext context = (IHttpListenerContext)state;
-
-            // For authentication
-            Thread.SetData(Thread.GetNamedDataSlot(HttpUser), context.AdaptedInstance.User.Identity);
-
-            _log.Info(context.Request.HttpMethod + " " + context.Request.RemoteEndPoint + ": " + context.Request.Url);
-            try
-            {
-                try
-                {
-                    string method = context.Request.HttpMethod;
-                    IWebDavMethodHandler methodHandler;
-                    if (!_methodHandlers.TryGetValue(method, out methodHandler))
-                        throw new WebDavMethodNotAllowedException(string.Format(CultureInfo.InvariantCulture, "%s ({0})", context.Request.HttpMethod));
-
-                    context.Response.AppendHeader("DAV", "1,2,1#extend");
-
-                    methodHandler.ProcessRequest(this, context, Store);
-
-                }
-                catch (WebDavException)
-                {
-                    throw;
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    throw new WebDavUnauthorizedException();
-                }
-                catch (FileNotFoundException ex)
-                {
-                    _log.Warn(ex.Message);
-                    throw new WebDavNotFoundException(innerException: ex);
-                }
-                catch (DirectoryNotFoundException ex)
-                {
-                    _log.Warn(ex.Message);
-                    throw new WebDavNotFoundException(innerException: ex);
-                }
-                catch (NotImplementedException ex)
-                {
-                    _log.Warn(ex.Message);
-                    throw new WebDavNotImplementedException(innerException: ex);
-                }
-                catch (Exception ex)
-                {
-                    _log.Warn(ex.Message);
-                    throw new WebDavInternalServerException(innerException: ex);
-                }
-            }
-            catch (WebDavException ex)
-            {
-                _log.Warn(ex.StatusCode + " " + ex.Message);
-                context.Response.StatusCode = ex.StatusCode;
-                context.Response.StatusDescription = ex.StatusDescription;
-                if (ex.Message != context.Response.StatusDescription)
-                {
-                    byte[] buffer = Encoding.UTF8.GetBytes(ex.Message);
-                    context.Response.ContentEncoding = Encoding.UTF8;
-                    context.Response.ContentLength64 = buffer.Length;
-                    context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-                }
-                context.Response.Close();
-            }
-            finally
-            {
-                _log.Info(context.Response.StatusCode + " " + context.Response.StatusDescription + ": " + context.Request.HttpMethod + " " + context.Request.RemoteEndPoint + ": " + context.Request.Url);
-            }
+            _webDavRequestProcessor.ProcessRequest(state as IWebDavContext);
         }
     }
 }

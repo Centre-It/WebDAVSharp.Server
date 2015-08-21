@@ -3,14 +3,14 @@ using System.IO;
 using System.Net;
 using System.Text;
 
-namespace WebDAVSharp.Server.Adapters
+namespace WebDAVSharp.Server.Adapters.Listener
 {
     /// <summary>
     /// This 
-    /// <see cref="IHttpListenerResponse" /> implementation wraps around a
+    /// <see cref="IWebDavResponse" /> implementation wraps around a
     /// <see cref="HttpListenerResponse" /> instance.
     /// </summary>
-    internal sealed class HttpListenerResponseAdapter : IHttpListenerResponse
+    internal sealed class HttpListenerResponseAdapter : IWebDavResponse
     {
         private readonly HttpListenerResponse _response;
 
@@ -26,20 +26,6 @@ namespace WebDAVSharp.Server.Adapters
             throw new ArgumentNullException("Response");
 
         _response = Response;
-        }
-
-        /// <summary>
-        /// Gets the internal instance that was adapted for WebDAV#.
-        /// </summary>
-        /// <value>
-        /// The adapted instance.
-        /// </value>
-        public HttpListenerResponse AdaptedInstance
-        {
-            get
-            {
-                return _response;
-            }
         }
 
         /// <summary>

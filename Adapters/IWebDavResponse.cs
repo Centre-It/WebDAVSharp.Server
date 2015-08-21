@@ -5,15 +5,9 @@ using System.Text;
 namespace WebDAVSharp.Server.Adapters
 {
     /// <summary>
-    /// This is an interface-version of the parts of 
-    /// <see cref="HttpListenerResponse" /> that
-    /// the 
-    /// <see cref="WebDavServer" /> requires to operator.
+    /// Base interface for Response
     /// </summary>
-    /// <remarks>
-    /// The main purpose of this interface is to facilitate unit-testing.
-    /// </remarks>
-    public interface IHttpListenerResponse : IAdapter<HttpListenerResponse>
+    public interface IWebDavResponse
     {
         /// <summary>
         /// Gets or sets the HTTP status code to be returned to the client.

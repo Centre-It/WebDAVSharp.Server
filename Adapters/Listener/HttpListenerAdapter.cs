@@ -2,23 +2,23 @@
 using System.Net;
 using System.Threading;
 
-namespace WebDAVSharp.Server.Adapters
+namespace WebDAVSharp.Server.Adapters.Listener
 {
     /// <summary>
     /// This 
     /// <see cref="IHttpListener" /> implementation wraps around a
     /// <see cref="HttpListener" /> instance.
     /// </summary>
-    internal sealed class HttpListenerAdapter : WebDavDisposableBase, IHttpListener, IAdapter<HttpListener>
+    internal sealed class HttpListenerAdapter : WebDavDisposableBase, IHttpListener, IAdapter<System.Net.HttpListener>
     {
-        private readonly HttpListener _listener;
+        private readonly System.Net.HttpListener _listener;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpListenerAdapter" /> class.
         /// </summary>
         internal HttpListenerAdapter()
         {
-            _listener = new HttpListener
+            _listener = new System.Net.HttpListener
             {
                 AuthenticationSchemes = AuthenticationSchemes.Negotiate,
                 UnsafeConnectionNtlmAuthentication = false
@@ -70,7 +70,7 @@ namespace WebDAVSharp.Server.Adapters
         /// <value>
         /// The adapted instance.
         /// </value>
-        public HttpListener AdaptedInstance
+        public System.Net.HttpListener AdaptedInstance
         {
             get
             {

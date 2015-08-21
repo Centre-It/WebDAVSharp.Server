@@ -38,13 +38,12 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Processes the request.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The
-        /// <see cref="IHttpListenerContext" /> object containing both the request and response
+        /// <see cref="IWebDavContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavPreconditionFailedException"></exception>
-        public void ProcessRequest(WebDavServer server, IHttpListenerContext context, IWebDavStore store)
+        public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
             ILog log = LogManager.GetCurrentClassLogger();
 
@@ -106,7 +105,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             bool isNew = false;
 
             // Get the parent collection of the item
-            IWebDavStoreCollection collection = GetParentCollection(server, store, context.Request.Url);
+            IWebDavStoreCollection collection = GetParentCollection(store, context, context.Request.Url);
 
             try
             {
@@ -164,28 +163,15 @@ namespace WebDAVSharp.Server.MethodHandlers
             string resp = responseDoc.InnerXml;
             byte[] responseBytes = Encoding.UTF8.GetBytes(resp);
 
-            if (isNew)
-            {
-                // HttpStatusCode doesn't contain WebDav status codes, but HttpWorkerRequest can handle these WebDav status codes
-                context.Response.StatusCode = (int)HttpStatusCode.Created;
-                context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription((int)HttpStatusCode.Created);
-            }
-            else
-            {
-                // HttpStatusCode doesn't contain WebDav status codes, but HttpWorkerRequest can handle these WebDav status codes
-                context.Response.StatusCode = (int)HttpStatusCode.OK;
-                context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription((int)HttpStatusCode.OK);
-            }
-            
+
+            context.SetStatusCode(isNew ? HttpStatusCode.Created : HttpStatusCode.OK);
 
             // set the headers of the response
             context.Response.ContentLength64 = responseBytes.Length;
-            context.Response.AdaptedInstance.ContentType = "text/xml";
+            context.Response.AppendHeader("ContentType", "text/xml");
 
             // the body
             context.Response.OutputStream.Write(responseBytes, 0, responseBytes.Length);
-
-            context.Response.Close();
         }
     }
 }

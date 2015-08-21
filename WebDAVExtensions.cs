@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using WebDAVSharp.Server.Adapters;
+using WebDAVSharp.Server.Adapters.Listener;
 using WebDAVSharp.Server.Exceptions;
 using WebDAVSharp.Server.Stores;
 
@@ -41,44 +42,59 @@ namespace WebDAVSharp.Server
         }
 
         /// <summary>
-        /// Sends a simple response with a specified HTTP status code but no content.
+        /// Sets status code and description.
         /// </summary>
         /// <param name="context">The <see cref="IHttpListenerContext" /> to send the response through.</param>
         /// <param name="statusCode">The HTTP status code for the response.</param>
         /// <exception cref="System.ArgumentNullException">context</exception>
         /// <exception cref="ArgumentNullException"><paramref name="context" /> is <c>null</c>.</exception>
-        public static void SendSimpleResponse(this IHttpListenerContext context, HttpStatusCode statusCode = HttpStatusCode.OK)
+        public static void SetStatusCode(this IWebDavContext context, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
 
             context.Response.StatusCode = (int)statusCode;
             context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription((int)statusCode);
-            context.Response.Close();
         }
 
         /// <summary>
-        /// Gets the prefix <see cref="Uri" /> that matches the specified <see cref="Uri" />.
+        /// Sets status code and description.
         /// </summary>
-        /// <param name="uri">The <see cref="Uri" /> to find the most specific prefix <see cref="Uri" /> for.</param>
-        /// <param name="server">The 
-        /// <see cref="WebDavServer" /> that hosts the WebDAV server and holds the collection
-        /// of known prefixes.</param>
-        /// <returns>
-        /// The most specific <see cref="Uri" /> for the given <paramref name="uri" />.
-        /// </returns>
-        /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavInternalServerException">Unable to find correct server root</exception>
-        /// <exception cref="WebDavInternalServerException"><paramref name="uri" /> specifies a <see cref="Uri" /> that is not known to the <paramref name="server" />.</exception>
-        public static Uri GetPrefixUri(this Uri uri, WebDavServer server)
+        /// <param name="context">The <see cref="IHttpListenerContext" /> to send the response through.</param>
+        /// <param name="statusCode">The HTTP status code for the response.</param>
+        /// <exception cref="System.ArgumentNullException">context</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="context" /> is <c>null</c>.</exception>
+        public static void SetStatusCode(this IWebDavContext context, int statusCode)
         {
-            string url = uri.ToString();
-            foreach (
-                string prefix in
-                    server.Listener.Prefixes.Where(
-                        prefix => url.StartsWith(uri.ToString(), StringComparison.OrdinalIgnoreCase)))
-                return new Uri(prefix);
-            throw new WebDavInternalServerException("Unable to find correct server root");
+            if (context == null)
+                throw new ArgumentNullException("context");
+
+            context.Response.StatusCode = statusCode;
+            context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription(statusCode);
         }
+
+        ///// <summary>
+        ///// Gets the prefix <see cref="Uri" /> that matches the specified <see cref="Uri" />.
+        ///// </summary>
+        ///// <param name="uri">The <see cref="Uri" /> to find the most specific prefix <see cref="Uri" /> for.</param>
+        ///// <param name="context">Context</param>
+        ///// <returns>
+        ///// The most specific <see cref="Uri" /> for the given <paramref name="uri" />.
+        ///// </returns>
+        ///// <exception cref="WebDAVSharp.Server.Exceptions.WebDavInternalServerException">Unable to find correct server root</exception>
+        ///// <exception cref="WebDavInternalServerException"><paramref name="uri" /> specifies a <see cref="Uri" /> that is not known to the <paramref name="server" />.</exception>
+        //public static Uri GetPrefixUri(this Uri uri, IWebDavContext context)
+        //{
+        //    string.Format("{0}://{1}", context.Request.Url.Scheme, context.Request.Url.Authority);
+
+        //    string url = uri.ToString();
+        //    foreach (
+        //        string prefix in
+        //            server.Listener.Prefixes.Where(
+        //                prefix => url.StartsWith(uri.ToString(), StringComparison.OrdinalIgnoreCase)))
+        //        return new Uri(prefix);
+        //    throw new WebDavInternalServerException("Unable to find correct server root");
+        //}
 
         /// <summary>
         /// Retrieves a store item through the specified
@@ -88,37 +104,36 @@ namespace WebDAVSharp.Server
         /// <see cref="IWebDavStore" />.
         /// </summary>
         /// <param name="uri">The <see cref="Uri" /> to retrieve the store item for.</param>
-        /// <param name="server">The <see cref="WebDavServer" /> that hosts the <paramref name="store" />.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> from which to retrieve the store item.</param>
+        /// <param name="context">Context</param>
         /// <returns>
         /// The retrieved store item.
         /// </returns>
         /// <exception cref="System.ArgumentNullException"><para>
         ///   <paramref name="uri" /> is <c>null</c>.</para>
         /// <para>
-        ///   <paramref name="server" /> is <c>null</c>.</para>
+        ///   <paramref name="context" /> is <c>null</c>.</para>
         /// <para>
         ///   <paramref name="store" /> is <c>null</c>.</para></exception>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavNotFoundException">If the item was not found.</exception>
         /// <exception cref="WebDavConflictException"><paramref name="uri" /> refers to a document in a collection, where the collection does not exist.</exception>
         /// <exception cref="WebDavNotFoundException"><paramref name="uri" /> refers to a document that does not exist.</exception>
-        public static IWebDavStoreItem GetItem(this Uri uri, WebDavServer server, IWebDavStore store)
+        public static IWebDavStoreItem GetItem(this Uri uri, IWebDavStore store, IWebDavContext context)
         {
             if (uri == null)
                 throw new ArgumentNullException("uri");
-            if (server == null)
-                throw new ArgumentNullException("server");
+            if (context == null)
+                throw new ArgumentNullException("context");
             if (store == null)
                 throw new ArgumentNullException("store");
 
-            Uri prefixUri = uri.GetPrefixUri(server);
             IWebDavStoreCollection collection = store.Root;
 
             IWebDavStoreItem item = null;
-            if (prefixUri.Segments.Length == uri.Segments.Length)
+            if (context.Request.Url.Segments.Length == uri.Segments.Length)
                 return collection;
-            
-            for (int index = prefixUri.Segments.Length; index < uri.Segments.Length; index++)
+
+            for (int index = context.Request.Url.Segments.Length; index < uri.Segments.Length; index++)
             {
                 string segmentName = Uri.UnescapeDataString(uri.Segments[index]);
                 IWebDavStoreItem nextItem = collection.GetItemByName(segmentName.TrimEnd('/', '\\'));

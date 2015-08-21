@@ -32,9 +32,8 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Processes the request.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The 
-        /// <see cref="IHttpListenerContext" /> object containing both the request and response
+        /// <see cref="IWebDavContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
         /// <exception cref="WebDavNotFoundException"><para>
@@ -43,10 +42,10 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <para>
         ///   <paramref name="context" /> specifies a request for a store item that is not a document.</para></exception>
         /// <exception cref="WebDavConflictException"><paramref name="context" /> specifies a request for a store item using a collection path that does not exist.</exception>
-        public void ProcessRequest(WebDavServer server, IHttpListenerContext context, IWebDavStore store)
+        public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
             // Get the parent collection of the item
-            IWebDavStoreCollection collection = GetParentCollection(server, store, context.Request.Url);
+            IWebDavStoreCollection collection = GetParentCollection(store, context, context.Request.Url);
 
             // Get the item from the collection
             IWebDavStoreItem item = GetItemFromCollection(collection, context.Request.Url);
@@ -56,15 +55,12 @@ namespace WebDAVSharp.Server.MethodHandlers
             ***************************************************************************************************/
             
             // HttpStatusCode doesn't contain WebDav status codes, but HttpWorkerRequest can handle these WebDav status codes
-            context.Response.StatusCode = (int)HttpStatusCode.OK;
-            context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription((int)HttpStatusCode.OK);
+            context.SetStatusCode();
 
             // set the headers of the response
             context.Response.ContentLength64 = 0;
             context.Response.AppendHeader("Content-Type", "text/html");
             context.Response.AppendHeader("Last-Modified", item.ModificationDate.ToUniversalTime().ToString("R"));
-
-            context.Response.Close();
         }
     }
 }

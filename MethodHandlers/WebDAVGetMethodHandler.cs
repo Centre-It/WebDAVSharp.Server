@@ -32,9 +32,8 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Processes the request.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The
-        /// <see cref="IHttpListenerContext" /> object containing both the request and response
+        /// <see cref="IWebDavContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavNotFoundException"></exception>
@@ -44,9 +43,9 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <para>
         ///   <paramref name="context" /> specifies a request for a store item that is not a document.</para></exception>
         /// <exception cref="WebDavConflictException"><paramref name="context" /> specifies a request for a store item using a collection path that does not exist.</exception>
-        public void ProcessRequest(WebDavServer server, IHttpListenerContext context, IWebDavStore store)
+        public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
-            IWebDavStoreCollection collection = GetParentCollection(server, store, context.Request.Url);
+            IWebDavStoreCollection collection = GetParentCollection(store, context, context.Request.Url);
             IWebDavStoreItem item = GetItemFromCollection(collection, context.Request.Url);
             IWebDavStoreDocument doc = item as IWebDavStoreDocument;
             if (doc == null)
@@ -71,7 +70,6 @@ namespace WebDAVSharp.Server.MethodHandlers
                 while ((inBuffer = stream.Read(buffer, 0, buffer.Length)) > 0)
                     context.Response.OutputStream.Write(buffer, 0, inBuffer);
             }
-            context.Response.Close();
         }
     }
 }

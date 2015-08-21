@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using WebDAVSharp.Server.Adapters;
+using WebDAVSharp.Server.Adapters.Listener;
 using WebDAVSharp.Server.Exceptions;
 using WebDAVSharp.Server.Stores;
 
@@ -18,8 +19,8 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <see cref="Uri" />.
         /// <see cref="WebDavException" /> 409 Conflict possible.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
+        /// <param name="context">Context</param>
         /// <param name="childUri">The <see cref="Uri" /> object containing the specific location of the child</param>
         /// <returns>
         /// The parrent collection as an <see cref="IWebDavStoreCollection" />
@@ -29,13 +30,13 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// </exception>
         /// <exception cref="WebDavUnauthorizedException">When the user is unauthorized and doesn't have access</exception>
         /// <exception cref="WebDavConflictException">When the parent collection doesn't exist</exception>
-        public static IWebDavStoreCollection GetParentCollection(WebDavServer server, IWebDavStore store, Uri childUri)
+        public static IWebDavStoreCollection GetParentCollection(IWebDavStore store, IWebDavContext context, Uri childUri)
         {
             Uri parentCollectionUri = childUri.GetParentUri();
             IWebDavStoreCollection collection;
             try
             {
-                collection = parentCollectionUri.GetItem(server, store) as IWebDavStoreCollection;
+                collection = parentCollectionUri.GetItem(store, context) as IWebDavStoreCollection;
             }
             catch (UnauthorizedAccessException)
             {
@@ -91,7 +92,7 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <returns>
         /// The values 0, 1 or -1 (for infinity)
         /// </returns>
-        public static int GetDepthHeader(IHttpListenerRequest request)
+        public static int GetDepthHeader(IWebDavRequest request)
         {
             // get the value of the depth header as a string
             string depth = request.Headers["Depth"];
@@ -112,9 +113,9 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Gets the Overwrite header : T or F
         /// </summary>
-        /// <param name="request">The <see cref="IHttpListenerRequest"/> has the header included</param>
+        /// <param name="request">The <see cref="IWebDavRequest"/> has the header included</param>
         /// <returns>The <see cref="bool"/> true if overwrite, false if no overwrite</returns>
-        public static bool GetOverwriteHeader(IHttpListenerRequest request)
+        public static bool GetOverwriteHeader(IWebDavRequest request)
         {
             // get the value of the Overwrite header as a string
             string overwrite = request.Headers["Overwrite"];
@@ -129,7 +130,7 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// </summary>
         /// <param name="request">The request with the request included</param>
         /// <returns>The value of the Timeout header as a string</returns>
-        public static string GetTimeoutHeader(IHttpListenerRequest request)
+        public static string GetTimeoutHeader(IWebDavRequest request)
         {
             // get the value of the timeout header as a string
             string timeout = request.Headers["Timeout"];
@@ -146,9 +147,9 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Gets the Destination header as an URI
         /// </summary>
-        /// <param name="request">The <see cref="IHttpListenerRequest"/> has the header included</param>
+        /// <param name="request">The <see cref="IWebDavRequest"/> has the header included</param>
         /// <returns>The <see cref="Uri"/> containing the destination</returns>
-        public static Uri GetDestinationHeader(IHttpListenerRequest request)
+        public static Uri GetDestinationHeader(IWebDavRequest request)
         {
             // get the value of the Destination header as a string
             string destinationUri = request.Headers["Destination"];

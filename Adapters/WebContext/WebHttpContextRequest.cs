@@ -3,29 +3,41 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Web;
 
-namespace WebDAVSharp.Server.Adapters
+namespace WebDAVSharp.Server.Adapters.WebContext
 {
     /// <summary>
     /// This is an interface-version of the parts of 
-    /// <see cref="HttpListenerRequest" /> that
+    /// <see cref="HttpRequestBase" /> that
     /// the 
     /// <see cref="WebDavServer" /> requires to operator.
     /// </summary>
-    /// <remarks>
+    /// /// <remarks>
     /// The main purpose of this interface is to facilitate unit-testing.
     /// </remarks>
-    public interface IHttpListenerRequest : IAdapter<HttpListenerRequest>
+    public class WebHttpContextRequest : IWebDavRequest
     {
+        private readonly HttpRequest _request;
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="request"></param>
+        public WebHttpContextRequest(HttpRequest request)
+        {
+            _request = request;
+        }
+
         /// <summary>
         /// Gets the client IP address and port number from which the request originated.
         /// </summary>
         /// <value>
         /// The remote end point.
         /// </value>
-        IPEndPoint RemoteEndPoint
+        public IPEndPoint RemoteEndPoint
         {
-            get;
+            get { return new IPEndPoint(IPAddress.Parse(_request.UserHostAddress), 80); }
         }
 
         /// <summary>
@@ -34,9 +46,9 @@ namespace WebDAVSharp.Server.Adapters
         /// <value>
         /// The URL.
         /// </value>
-        Uri Url
+        public Uri Url
         {
-            get;
+            get { return _request.Url; }
         }
 
         /// <summary>
@@ -45,9 +57,9 @@ namespace WebDAVSharp.Server.Adapters
         /// <value>
         /// The HTTP method.
         /// </value>
-        string HttpMethod
+        public string HttpMethod
         {
-            get;
+            get { return _request.HttpMethod; }
         }
 
         /// <summary>
@@ -56,9 +68,9 @@ namespace WebDAVSharp.Server.Adapters
         /// <value>
         /// The headers.
         /// </value>
-        NameValueCollection Headers
+        public NameValueCollection Headers
         {
-            get;
+            get { return _request.Headers; }
         }
 
         /// <summary>
@@ -67,9 +79,9 @@ namespace WebDAVSharp.Server.Adapters
         /// <value>
         /// The input stream.
         /// </value>
-        Stream InputStream
+        public Stream InputStream
         {
-            get;
+            get { return _request.InputStream; }
         }
 
         /// <summary>
@@ -78,9 +90,9 @@ namespace WebDAVSharp.Server.Adapters
         /// <value>
         /// The content encoding.
         /// </value>
-        Encoding ContentEncoding
+        public Encoding ContentEncoding
         {
-            get;
+            get { return _request.ContentEncoding; }
         }
 
         /// <summary>
@@ -89,9 +101,9 @@ namespace WebDAVSharp.Server.Adapters
         /// <value>
         /// The content length64.
         /// </value>
-        long ContentLength64
+        public long ContentLength64
         {
-            get;
+            get { return _request.ContentLength; }
         }
     }
 }

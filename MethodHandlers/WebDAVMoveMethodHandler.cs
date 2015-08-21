@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using WebDAVSharp.Server.Adapters;
+using WebDAVSharp.Server.Adapters.Listener;
 using WebDAVSharp.Server.Exceptions;
 using WebDAVSharp.Server.Stores;
 
@@ -33,34 +34,31 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Processes the request.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The 
         /// <see cref="IHttpListenerContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
-        public void ProcessRequest(WebDavServer server, IHttpListenerContext context, IWebDavStore store)
+        public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
-            var source = context.Request.Url.GetItem(server, store);
+            var source = context.Request.Url.GetItem(store, context);
 
-            MoveItem(server, context, store, source);
+            MoveItem(context, store, source);
         }
 
         /// <summary>
         /// Moves the
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The 
-        /// <see cref="IHttpListenerContext" /> object containing both the request and response
+        /// <see cref="IWebDavContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
         /// <param name="sourceWebDavStoreItem">The <see cref="IWebDavStoreItem" /> that will be moved</param>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavForbiddenException">If the source path is the same as the destination path</exception>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavPreconditionFailedException">If one of the preconditions failed</exception>
-        private void MoveItem(WebDavServer server, IHttpListenerContext context, IWebDavStore store,
-            IWebDavStoreItem sourceWebDavStoreItem)
+        private void MoveItem(IWebDavContext context, IWebDavStore store, IWebDavStoreItem sourceWebDavStoreItem)
         {
             Uri destinationUri = GetDestinationHeader(context.Request);
-            IWebDavStoreCollection destinationParentCollection = GetParentCollection(server, store, destinationUri);
+            IWebDavStoreCollection destinationParentCollection = GetParentCollection(store, context, destinationUri);
 
             bool isNew = true;
 
@@ -81,7 +79,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             destinationParentCollection.MoveItemHere(sourceWebDavStoreItem, destinationName);
 
             // send correct response
-            context.SendSimpleResponse(isNew ? HttpStatusCode.Created : HttpStatusCode.NoContent);
+            context.SetStatusCode(isNew ? HttpStatusCode.Created : HttpStatusCode.NoContent);
         }
     }
 }

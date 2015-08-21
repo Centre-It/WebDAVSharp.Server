@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Net;
+using System.Security.Principal;
 
-namespace WebDAVSharp.Server.Adapters
+namespace WebDAVSharp.Server.Adapters.Listener
 {
     /// <summary>
     /// This 
     /// <see cref="IHttpListenerContext" /> implementation wraps around a
     /// <see cref="HttpListenerContext" /> instance.
     /// </summary>
-    internal sealed class HttpListenerContextAdapter : IHttpListenerContext, IAdapter<HttpListenerContext>
+    internal sealed class HttpListenerContextAdapter : IHttpListenerContext
     {
         private readonly HttpListenerContext _context;
         private readonly HttpListenerRequestAdapter _request;
@@ -45,9 +46,9 @@ namespace WebDAVSharp.Server.Adapters
         }
 
         /// <summary>
-        /// Gets the <see cref="IHttpListenerRequest" /> request adapter.
+        /// Gets the <see cref="IWebDavRequest" /> request adapter.
         /// </summary>
-        public IHttpListenerRequest Request
+        public IWebDavRequest Request
         {
             get
             {
@@ -56,14 +57,24 @@ namespace WebDAVSharp.Server.Adapters
         }
 
         /// <summary>
-        /// Gets the <see cref="IHttpListenerResponse" /> response adapter.
+        /// Gets the <see cref="IWebDavResponse" /> response adapter.
         /// </summary>
-        public IHttpListenerResponse Response
+        public IWebDavResponse Response
         {
             get
             {
                 return _response;
             }
+        }
+
+        public IPrincipal User
+        {
+            get { return _context.User; }
+        }
+
+        public void AfterProcessRequest()
+        {
+            Response.Close();
         }
     }
 }

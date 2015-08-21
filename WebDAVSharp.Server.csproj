@@ -65,7 +65,7 @@
       <HintPath>packages\Common.Logging.2.2.0\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Common.Logging.Core">
-      <HintPath>packages\Common.Logging.Core.2.2.0\lib\net40\Common.Logging.Core.dll</HintPath>
+      <HintPath>..\packages\Common.Logging.Core.2.2.0\lib\net40\Common.Logging.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -74,13 +74,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Adapters\HttpListenerContextAdapter.cs" />
-    <Compile Include="Adapters\HttpListenerRequestAdapter.cs" />
-    <Compile Include="Adapters\HttpListenerResponseAdapter.cs" />
+    <Compile Include="Adapters\WebContext\WebDavHttpContext.cs" />
+    <Compile Include="Adapters\Listener\HttpListenerContextAdapter.cs" />
+    <Compile Include="Adapters\Listener\HttpListenerRequestAdapter.cs" />
+    <Compile Include="Adapters\Listener\HttpListenerResponseAdapter.cs" />
     <Compile Include="Adapters\IAdapter.cs" />
-    <Compile Include="Adapters\IHttpListenerContext.cs" />
-    <Compile Include="Adapters\IHttpListenerRequest.cs" />
-    <Compile Include="Adapters\IHttpListenerResponse.cs" />
+    <Compile Include="Adapters\IHttpContext.cs" />
+    <Compile Include="Adapters\WebContext\IWebHttpContext.cs" />
+    <Compile Include="Adapters\WebContext\WebHttpContextRequest.cs" />
+    <Compile Include="Adapters\WebContext\WebHttpContextResponse.cs" />
+    <Compile Include="Adapters\Listener\IHttpListenerContext.cs" />
+    <Compile Include="Adapters\IWebDavContext.cs" />
+    <Compile Include="Adapters\IWebDavRequest.cs" />
+    <Compile Include="Adapters\IWebDavResponse.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Exceptions\WebDavLengthRequiredException.cs" />
     <Compile Include="Exceptions\WebDavUnsupportedMediaTypeException.cs" />
     <Compile Include="Exceptions\WebDavPreconditionFailedException.cs" />
@@ -124,9 +131,11 @@
     <Compile Include="Utilities\WebDavStatusCode.cs" />
     <Compile Include="WebDavDisposableBase.cs" />
     <Compile Include="WebDavExtensions.cs" />
+    <Compile Include="WebDavHttpHandler.cs" />
     <Compile Include="WebDavProperty.cs" />
+    <Compile Include="WebDavRequestProcessor.cs" />
     <Compile Include="WebDavServer.cs" />
-    <Compile Include="Adapters\HttpListenerAdapter.cs" />
+    <Compile Include="Adapters\Listener\HttpListenerAdapter.cs" />
     <Compile Include="MethodHandlers\WebDavMethodHandlers.cs" />
   </ItemGroup>
   <ItemGroup>

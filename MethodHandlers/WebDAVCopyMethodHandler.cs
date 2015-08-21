@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Web;
 using WebDAVSharp.Server.Adapters;
+using WebDAVSharp.Server.Adapters.Listener;
 using WebDAVSharp.Server.Exceptions;
 using WebDAVSharp.Server.Stores;
 
@@ -33,17 +35,16 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Processes the request.
         /// </summary>
-        /// <param name="server">The <see cref="WebDavServer" /> through which the request came in from the client.</param>
         /// <param name="context">The 
         /// <see cref="IHttpListenerContext" /> object containing both the request and response
         /// objects to use.</param>
         /// <param name="store">The <see cref="IWebDavStore" /> that the <see cref="WebDavServer" /> is hosting.</param>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavMethodNotAllowedException"></exception>
-        public void ProcessRequest(WebDavServer server, IHttpListenerContext context, IWebDavStore store)
+        public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {            
-            IWebDavStoreItem source = context.Request.Url.GetItem(server, store);
+            IWebDavStoreItem source = context.Request.Url.GetItem(store, context);
             if (source is IWebDavStoreDocument || source is IWebDavStoreCollection)
-                CopyItem(server, context, store, source);
+                CopyItem(context, store, source);
             else
                 throw new WebDavMethodNotAllowedException();
         }
@@ -51,17 +52,15 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <summary>
         /// Copies the item.
         /// </summary>
-        /// <param name="server">The server.</param>
         /// <param name="context">The context.</param>
         /// <param name="store">The store.</param>
         /// <param name="source">The source.</param>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavForbiddenException"></exception>
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavPreconditionFailedException"></exception>
-        private static void CopyItem(WebDavServer server, IHttpListenerContext context, IWebDavStore store,
-            IWebDavStoreItem source)
+        private static void CopyItem(IWebDavContext context, IWebDavStore store, IWebDavStoreItem source)
         {
             Uri destinationUri = GetDestinationHeader(context.Request);
-            IWebDavStoreCollection destinationParentCollection = GetParentCollection(server, store, destinationUri);
+            IWebDavStoreCollection destinationParentCollection = GetParentCollection(store, context, destinationUri);
 
             bool copyContent = (GetDepthHeader(context.Request) != 0);
             bool isNew = true;
@@ -82,7 +81,8 @@ namespace WebDAVSharp.Server.MethodHandlers
 
             destinationParentCollection.CopyItemHere(source, destinationName, copyContent);
 
-            context.SendSimpleResponse(isNew ? HttpStatusCode.Created : HttpStatusCode.NoContent);
+            var statusCode = isNew ? HttpStatusCode.Created : HttpStatusCode.NoContent;
+            context.SetStatusCode(statusCode);
         }
     }
 }
