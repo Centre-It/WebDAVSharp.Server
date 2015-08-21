@@ -132,12 +132,12 @@ namespace WebDAVSharp.Server.MethodHandlers
             // else, return false
         }
 
-        public static string GetLockTokenIfHeader(IHttpListenerRequest request)
+        public static string GetLockTokenIfHeader(IWebDavRequest request)
         {
             //(<urn:uuid:cfdc70da-7feb-4bfe-8cb7-18f97d8fecb1>)
             return request.Headers.AllKeys.Contains("If") ? request.Headers["If"].Substring(2, request.Headers["If"].Length-4) : string.Empty;
         }
-        public static string GetLockTokenHeader(IHttpListenerRequest request)
+        public static string GetLockTokenHeader(IWebDavRequest request)
         {
             if (!request.Headers.AllKeys.Contains("Lock-Token")) return string.Empty;
             string token = request.Headers["Lock-Token"];

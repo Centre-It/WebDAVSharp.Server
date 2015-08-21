@@ -77,11 +77,17 @@ namespace WebDAVSharp.Server.Adapters.Listener
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="IPrincipal" /> of the context.
+        /// </summary>
         public IPrincipal User
         {
             get { return _context.User; }
         }
 
+        /// <summary>
+        /// Any additional operations after main process request logic
+        /// </summary>
         public void AfterProcessRequest()
         {
             Response.Close();

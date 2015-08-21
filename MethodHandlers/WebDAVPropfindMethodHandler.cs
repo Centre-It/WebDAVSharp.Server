@@ -65,7 +65,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             }
         }
 
-        internal IHttpListenerContext _Context;
+        internal IWebDavContext Context;
 
         #endregion
 
@@ -81,7 +81,7 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavUnauthorizedException"></exception>
         public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
-            _Context = context;
+            Context = context;
             /***************************************************************************************************
              * Retreive all the information from the request
              ***************************************************************************************************/

@@ -141,7 +141,6 @@
     <Compile Include="WebDavProperty.cs" />
     <Compile Include="WebDavRequestProcessor.cs" />
     <Compile Include="WebDavServer.cs" />
-    <Compile Include="Adapters\Listener\HttpListenerAdapter.cs" />
     <Compile Include="Adapters\AuthenticationTypes\HttpListenerNegotiateAdapter.cs" />
     <Compile Include="MethodHandlers\WebDavMethodHandlers.cs" />
   </ItemGroup>

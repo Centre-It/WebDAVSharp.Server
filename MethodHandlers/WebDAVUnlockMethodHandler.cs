@@ -50,7 +50,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             /***************************************************************************************************
             * Send the response
             ***************************************************************************************************/
-            WindowsIdentity Identity = (WindowsIdentity)Thread.GetData(Thread.GetNamedDataSlot(WebDavServer.HttpUser));
+            WindowsIdentity Identity = (WindowsIdentity)Thread.GetData(Thread.GetNamedDataSlot(Constants.HttpUser));
             var statusCode = WebDavStoreItemLock.UnLock(context.Request.Url, GetLockTokenHeader(context.Request), Identity.Name);
             context.SetStatusCode(statusCode);
         }

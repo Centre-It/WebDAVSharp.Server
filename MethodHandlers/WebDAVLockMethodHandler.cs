@@ -54,8 +54,6 @@ namespace WebDAVSharp.Server.MethodHandlers
         /// <exception cref="WebDAVSharp.Server.Exceptions.WebDavPreconditionFailedException"></exception>
         public void ProcessRequest(IWebDavContext context, IWebDavStore store)
         {
-
-
             /***************************************************************************************************
              * Retreive al the information from the request
              ***************************************************************************************************/
@@ -131,7 +129,7 @@ namespace WebDAVSharp.Server.MethodHandlers
 
                 string lockuser = ownerNode.InnerText;
 
-                WindowsIdentity Identity = (WindowsIdentity)Thread.GetData(Thread.GetNamedDataSlot(WebDavServer.HttpUser));
+                WindowsIdentity Identity = (WindowsIdentity)Thread.GetData(Thread.GetNamedDataSlot(Constants.HttpUser));
 
                 lockResult = WebDavStoreItemLock.Lock(context.Request.Url, lockscope, locktype, Identity.Name, ref timeout,
                     out locktoken, requestDocument, depth);
@@ -155,7 +153,7 @@ namespace WebDAVSharp.Server.MethodHandlers
                 lockResult = WebDavStoreItemLock.RefreshLock(context.Request.Url, locktoken, ref timeout, out requestDocument);
                 if (requestDocument == null)
                 {
-                    context.SendSimpleResponse(409);
+                    context.SetStatusCode(409);
                     return;
                 }
 
@@ -232,8 +230,7 @@ namespace WebDAVSharp.Server.MethodHandlers
             string resp = responseDoc.InnerXml;
             byte[] responseBytes = Encoding.UTF8.GetBytes(resp);
 
-
-            context.SetStatusCode(isNew ? HttpStatusCode.Created : HttpStatusCode.OK);
+            context.SetStatusCode(lockResult);
             context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription(lockResult);
 
             // set the headers of the response

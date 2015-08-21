@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Principal;
 using System.Threading;
 using Common.Logging;
@@ -129,27 +130,11 @@ namespace WebDAVSharp.Server
                     break;
 
             }
-            methodHandlers = methodHandlers ?? WebDavMethodHandlers.BuiltIn;
-
-            IWebDavMethodHandler[] webDavMethodHandlers = methodHandlers as IWebDavMethodHandler[] ?? methodHandlers.ToArray();
-
-            if (!webDavMethodHandlers.Any())
-                throw new ArgumentException("The methodHandlers collection is empty", "methodHandlers");
-            if (webDavMethodHandlers.Any(methodHandler => methodHandler == null))
-                throw new ArgumentException("The methodHandlers collection contains a null-reference", "methodHandlers");
 
             //_negotiateListener = listener;
             _store = store;
-            var handlersWithNames =
-                from methodHandler in webDavMethodHandlers
-                from name in methodHandler.Names
-                select new
-                {
-                    name,
-                    methodHandler
-                };
-            _methodHandlers = handlersWithNames.ToDictionary(v => v.name, v => v.methodHandler);
 
+            _webDavRequestProcessor = new WebDavRequestProcessor(store, methodHandlers);
         }
 
         /// <summary>

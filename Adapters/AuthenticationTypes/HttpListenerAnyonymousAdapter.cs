@@ -6,10 +6,11 @@ using System.Security;
 using System.Security.Principal;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
+using WebDAVSharp.Server.Adapters.Listener;
 
 namespace WebDAVSharp.Server.Adapters.AuthenticationTypes
 {
-    class HttpListenerAnyonymousAdapter : WebDavDisposableBase, IHttpListener, IAdapter<HttpListener>
+    class HttpListenerAnyonymousAdapter : WebDavDisposableBase, IHttpListener
     {
         public HttpListenerAnyonymousAdapter()
         {

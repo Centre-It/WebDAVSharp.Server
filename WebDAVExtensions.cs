@@ -53,8 +53,8 @@ namespace WebDAVSharp.Server
             if (context == null)
                 throw new ArgumentNullException("context");
 
-            context.Response.StatusCode = statusCode;
-            context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription(statusCode);
+            context.Response.StatusCode = (int) statusCode;
+            context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription((int)statusCode);
         }
 
         /// <summary>
@@ -71,26 +71,6 @@ namespace WebDAVSharp.Server
 
             context.Response.StatusCode = statusCode;
             context.Response.StatusDescription = HttpWorkerRequest.GetStatusDescription(statusCode);
-
-            string exactPrefix = server.Listener.Prefixes
-                .FirstOrDefault(item => url.StartsWith(item, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(exactPrefix))
-            {
-                return new Uri(exactPrefix);
-            }
-
-            string wildcardUrl = new UriBuilder(uri) { Host = "WebDAVSharpSpecialHostTag" }
-                .ToString().Replace("WebDAVSharpSpecialHostTag", "*");
-
-            string wildcardPrefix = server.Listener.Prefixes
-                .FirstOrDefault(item => wildcardUrl.StartsWith(item, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(wildcardPrefix))
-            {
-                return new Uri(wildcardPrefix.Replace("://*", string.Format("://{0}", uri.Host)));
-            }
-           
         }
 
         ///// <summary>
