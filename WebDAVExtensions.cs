@@ -130,17 +130,20 @@ namespace WebDAVSharp.Server
             IWebDavStoreCollection collection = store.Root;
 
             IWebDavStoreItem item = null;
-            if (context.Request.Url.Segments.Length == uri.Segments.Length)
+            
+            if (context.Request.Url.Segments.Length - 1 == uri.Segments.Length)
                 return collection;
 
-            for (int index = context.Request.Url.Segments.Length; index < uri.Segments.Length; index++)
+            //todo пути с глубиной больше рута глючат. надо дописать логику далее.
+
+            for (int index = uri.Segments.Length; index < context.Request.Url.Segments.Length; index++)
             {
-                string segmentName = Uri.UnescapeDataString(uri.Segments[index]);
+                string segmentName = Uri.UnescapeDataString(context.Request.Url.Segments[index]);
                 IWebDavStoreItem nextItem = collection.GetItemByName(segmentName.TrimEnd('/', '\\'));
                 if (nextItem == null)
                     throw new WebDavNotFoundException(); //throw new WebDavConflictException();
 
-                if (index == uri.Segments.Length - 1)
+                if (index == context.Request.Url.Segments.Length - 1)
                     item = nextItem;
                 else
                 {

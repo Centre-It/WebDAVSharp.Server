@@ -84,8 +84,10 @@ namespace WebDAVSharp.Server
                 throw new WebDavInternalServerException();
             }
 
+            var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+
             // For authentication
-            Thread.SetData(Thread.GetNamedDataSlot(Constants.HttpUser), context.User.Identity);
+            Thread.SetData(Thread.GetNamedDataSlot(Constants.HttpUser), identity);
 
             _log.Info(context.Request.HttpMethod + " " + context.Request.RemoteEndPoint + ": " + context.Request.Url);
             try
@@ -144,7 +146,7 @@ namespace WebDAVSharp.Server
                     context.Response.ContentLength64 = buffer.Length;
                     context.Response.OutputStream.Write(buffer, 0, buffer.Length);
                 }
-                context.Response.Close();
+                context.AfterProcessRequest();
             }
             finally
             {

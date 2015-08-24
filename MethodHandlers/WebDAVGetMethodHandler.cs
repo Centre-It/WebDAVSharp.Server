@@ -76,6 +76,9 @@ namespace WebDAVSharp.Server.MethodHandlers
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.OK;
 
+                    //todo Это статика. Надо определять MIME тип по расширению
+                    context.Response.AppendHeader("Content-type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
                     if (docSize > 0)
                         context.Response.ContentLength64 = docSize;
 
