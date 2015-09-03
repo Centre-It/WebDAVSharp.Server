@@ -1,4 +1,4 @@
-using System;
+п»їusing System;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -134,7 +134,7 @@ namespace WebDAVSharp.Server
             if (context.Request.Url.Segments.Length - 1 == uri.Segments.Length)
                 return collection;
 
-            //todo пути с глубиной больше рута глючат. надо дописать логику далее.
+            //todo РїСѓС‚Рё СЃ РіР»СѓР±РёРЅРѕР№ Р±РѕР»СЊС€Рµ СЂСѓС‚Р° РіР»СЋС‡Р°С‚. РЅР°РґРѕ РґРѕРїРёСЃР°С‚СЊ Р»РѕРіРёРєСѓ РґР°Р»РµРµ.
 
             for (int index = uri.Segments.Length; index < context.Request.Url.Segments.Length; index++)
             {
