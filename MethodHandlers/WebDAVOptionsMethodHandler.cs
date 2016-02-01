@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using WebDAVSharp.Server.Adapters;
 using WebDAVSharp.Server.Stores;
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Web;
 
 namespace WebDAVSharp.Server.Stores.BaseClasses
